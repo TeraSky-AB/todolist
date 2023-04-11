@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react'
 import Switch from "react-switch"
 
 function DarkModeEnabler() {
-    const [darkModeEnabled, setDarkDarkModeEnabled] = useState(false)
+    const darkThemeKey = "DarkTheme"
+    const [darkModeEnabled, setDarkDarkModeEnabled] = useState(JSON.parse(localStorage.getItem(darkThemeKey)) || false)
 
     useEffect(() => {
         document.firstElementChild.setAttribute("class", darkModeEnabled ? "dark" : "light");
+        localStorage.setItem(darkThemeKey, JSON.stringify(darkModeEnabled))
     }, [darkModeEnabled])
 
     return (

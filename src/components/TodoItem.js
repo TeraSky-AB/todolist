@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 
-function TodoItem({item, deleteTodo}) {
+function TodoItem({item, deleteTodo, checkTodo}) {
     const [ doneState, setDoneState ] = useState(item.state)
 
     const changeTodoState = () => {
         setDoneState(!doneState)
+        checkTodo(item.id)
     }
 
     return (

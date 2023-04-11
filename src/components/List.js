@@ -1,58 +1,38 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import TodoItem from './TodoItem'
 import TodoAdder from './TodoAdder'
 
 function List() {
-  const [ dateSorting, setDateSorting ] = useState(false)
-  const [ todoList, setTodoList ] = useState([
-    {
-      id: 1,
-      text: "Go to sleep at 12am",
-      date: new Date(),
-      state: false,
-    },
-    {
-      id: 2,
-      text: "Make the dishes",
-      date: new Date(),
-      state: true,
-    },
-    {
-      id: 5,
-      text: "Tidy my room",
-      date: new Date(),
-      state: true,
-    },
-    {
-      id: 4,
-      text: "Suspendisse potenti. In quis condimentum ipsum. Nulla convallis in lectus in tempor. Aenean ac arcu scelerisque, convallis augue vel, aliquet ligula.",
-      date: new Date(new Date()-10000),
-      state: false,
-    },
-  ])
+  const todosItemName = "todos"
+  const [ onlyNotDoneTodo, setOnlyNotDoneTodo ] = useState(false)
+  const [ fullTodoList, setFullTodoList ] = useState(() => {
+    return JSON.parse(localStorage.getItem(todosItemName)) || []
+  })
+  const [ todoList, setTodoList ] = useState(fullTodoList)
+
+  const checkTodo = (id) => {
+    let todoChecked = fullTodoList.find(e => e.id === id)
+    const newFullTodoList = fullTodoList.filter(e => e.id !== id)
+    todoChecked.state = !todoChecked.state
+    const newTodoList = [...newFullTodoList, todoChecked]
+    setFullTodoList(newTodoList.sort((a,b) => a.id > b.id ? 1 : -1))
+  }
 
   const deleteTodo = (id) => {
-    const newTodoList = todoList.filter(e => e.id !== id)
-    console.log(newTodoList, id)
-    setTodoList(newTodoList)
+    const newTodoList = fullTodoList.filter(e => e.id !== id)
+    setFullTodoList(newTodoList)
   }
 
   const addTodo = (tdText) => {
-    const nextID = todoList.sort(idSortingFunc)[todoList.length-1].id+1
+    const listLen = fullTodoList.length
+    const nextID =  listLen > 2 ? fullTodoList.sort(idSortingFunc)[todoList.length-1].id+1 : listLen ? 1 : 0 
     const newTodo = {
       id: nextID,
       text: tdText,
       date: new Date(),
       state: false,
     }
-    setTodoList([...todoList, newTodo])
-  }
-
-  const dateSortingFunc = () => {
-    const newTodoList = todoList.sort((a,b) => {
-        return a.date > b.date ? 1 : -1
-    })
-    setTodoList(newTodoList)
+    setFullTodoList([...todoList, newTodo])
   }
 
   const idSortingFunc = () => {
@@ -62,22 +42,40 @@ function List() {
     setTodoList(newTodoList)
   }
   
-  
-  
+  const displayOnlyNotDoneTodos = () => {
+    if(onlyNotDoneTodo) {
+      //Only not done todos
+      const newTodoList = fullTodoList.filter(e => e.state === false)
+      setTodoList(newTodoList)
+    } else {
+      //All todos
+      const newTodoList = fullTodoList
+      setTodoList(newTodoList)
+    }
+  }
 
+  useEffect(() => {
+    displayOnlyNotDoneTodos()
+    // eslint-disable-next-line
+  }, [onlyNotDoneTodo])
+
+  useEffect(() => {
+    displayOnlyNotDoneTodos()
+    localStorage.setItem(todosItemName, JSON.stringify(fullTodoList))
+    // eslint-disable-next-line
+  }, [fullTodoList])
+    
   return (
     <div className='min-h-fit min-w-[60%] max-w-[80%] px-10 py-7 mx-auto bg-slate-300 dark:bg-slate-800 dark:text-white rounded-xl flex flex-col gap-[6px] relative'>
         <TodoAdder addTodo={addTodo}/>
         <div className='relative top-[-4px] flex justify-between font-semibold text-slate-500'>
           <span>List:</span>
           <div className='flex gap-1'>
-            Sort:
-            <button onClick={() => {idSortingFunc();setDateSorting(false)}} className={dateSorting ? "ml-1" : "text-slate-900 dark:text-slate-200 ml-1"}>ID</button>
-            <button onClick={() => {dateSortingFunc();setDateSorting(true)}} className={dateSorting ? "text-slate-900 dark:text-slate-200" : ""}>Date</button>
+            Filter:
+            <button onClick={() => {setOnlyNotDoneTodo(!onlyNotDoneTodo)}} className="text-slate-900 dark:text-slate-200">{onlyNotDoneTodo ? "Not done" : "All"}</button>
           </div>
-          
         </div>
-        {todoList.map(task => <TodoItem item={task} deleteTodo={deleteTodo} key={task.id}/>)}
+        {todoList.length === 0 ? <p className='p-5 bg-slate-200 rounded-md dark:text-slate-950'>{onlyNotDoneTodo ? "All your tasks are done !" : "Add your first task !"}</p> : todoList.map(task => <TodoItem item={task} deleteTodo={deleteTodo} checkTodo={checkTodo} key={task.id}/>)}
     </div>
   )
 }
