@@ -24,10 +24,10 @@ function List() {
   }
 
   const addTodo = (tdText) => {
-    const listLen = fullTodoList.length
-    const nextID =  listLen > 2 ? fullTodoList.sort(idSortingFunc)[todoList.length-1].id+1 : listLen ? 1 : 0 
+    //const listLen = fullTodoList.length
+    //const nextID =  listLen > 2 ? fullTodoList.sort(idSortingFunc)[todoList.length-1].id+1 : listLen ? 1 : 0 
     const newTodo = {
-      id: nextID,
+      id: Date.now(),
       text: tdText,
       date: new Date(),
       state: false,
@@ -35,13 +35,15 @@ function List() {
     setFullTodoList([...todoList, newTodo])
   }
 
+  /**
   const idSortingFunc = () => {
     const newTodoList = todoList.sort((a,b) => {
       return a.id > b.id ? 1 : -1
     })
     setTodoList(newTodoList)
   }
-  
+  */
+
   const displayOnlyNotDoneTodos = () => {
     if(onlyNotDoneTodo) {
       //Only not done todos
@@ -49,8 +51,7 @@ function List() {
       setTodoList(newTodoList)
     } else {
       //All todos
-      const newTodoList = fullTodoList
-      setTodoList(newTodoList)
+      setTodoList(fullTodoList)
     }
   }
 
